@@ -1,320 +1,318 @@
-\# PRAXIS TITAN — P6.3 (Governance-Ready Release)
+PRAXIS MANTIS v3.6
 
+Policy Planning Engine — Cost-Aware, Budget-Governed
 
+Author: Samuel Lawson
+Division: Dark Science Division
+Associated Engine: PRAXIS TITAN P6.x
+System Class: Governed Analytic Planner
+Execution Mode: Offline, deterministic, file-driven
+Autonomy Level: Decision support only (no execution, no mutation)
 
-\*\*Offline Probabilistic Risk Analysis Engine for Complex Systems\*\*
+1. System Overview
 
+PRAXIS MANTIS is a governed policy planning engine designed to operate on top of a validated PRAXIS TITAN baseline risk state.
 
+MANTIS does not modify system state, execute mitigations, or autonomously act.
+Its sole function is to select, rank, and sequence mitigation policies under hard budget constraints, producing a fully auditable plan artifact.
 
-Author: Samuel Lawson  
+The system is explicitly designed for safety-grade analytic workflows, where cost, risk, and governance must remain visible, deterministic, and human-controlled.
 
-Division: Dark Science Division  
+2. Core Purpose
 
-License: PRCAL v1.0 (Research \& Attribution)  
+MANTIS exists to answer a single question:
 
-Status: Public Research Release — Governance-Hardened  
+“Given the current risk state and a fixed budget, what mitigation actions are affordable, effective, and justifiable?”
 
-Autonomy Level: Decision Support Only (Non-Executing)
+It achieves this by:
 
+Selecting mitigation policies that reduce system failure probability (p_top)
 
+Enforcing absolute budget ceilings using ISC events
 
----
+Preventing unsafe, unaffordable, or speculative actions
 
+Producing a deterministic, auditable mitigation plan
 
+Operating identically across urgency modes
 
-\## 1. Overview
+MANTIS plans only.
+Execution is always external.
 
+3. Explicit Non-Capabilities
 
+MANTIS is intentionally constrained.
 
-PRAXIS TITAN is an \*\*offline, file-driven probabilistic risk analysis engine\*\* designed to model complex, interdependent systems under uncertainty.
+It does not:
 
+Execute mitigation actions
 
+Mutate TITAN state
 
-Unlike cloud-based or agent-driven AI tools, PRAXIS is built for:
+Override or refund budgets
 
+Self-authorize execution
 
+Depend on cloud services
 
-\- Deterministic reproducibility
+Perform probabilistic inference or learning
 
-\- Auditable outputs
+Operate as an autonomous agent
 
-\- Human-in-the-loop governance
+All behavior is explicit, bounded, and auditable.
 
-\- Explicit cost and consequence modeling
+4. Operational Inputs & Outputs
+Inputs
+Artifact	Description
+baseline_summary.json	Canonical TITAN P6.x output (risk state, p_top, drivers, ISC history)
+Environment Variables	Optional runtime flags (e.g. PRAXIS_NO_CHRONOS)
+CLI Arguments	Execution mode selection (`--mode HYBRID
+Outputs
+Artifact	Description
+mantis_plan.json	Immutable mitigation plan (policy selection + explanations)
+Console Trace	Deterministic execution log
+Chronos Entry	Optional, disabled by default
 
+Outputs are write-only.
+No runtime mutation occurs.
 
+5. Execution Modes
 
-The \*\*P6.3 release\*\* represents a governance-hardening milestone focused on safety, restraint, and correctness rather than speed or autonomy.
+Execution mode affects policy ranking only, never legality.
 
+Mode	Behavior
+HYBRID	Balanced: goal-driven with cost awareness
+ASAP	Aggressive: fastest goal compliance under budget
+EFF	Efficiency-maximizing: best risk reduction per ISC
 
+Budget rules are absolute across all modes.
 
----
+6. Budget Governance Model
+Cost Unit
 
+ISC Events (Internal System Cost)
 
+Budget Rules
 
-\## 2. Core Capabilities
+Absolute ceiling
 
+No negative balances
 
+No soft overruns
 
-PRAXIS TITAN integrates multiple analytic domains:
+No refunds
 
+Fail-closed enforcement
 
+Enforcement Points
 
-\- Numeric risk scoring
+Pre-selection affordability gate
 
-\- Bayesian likelihood updating
+Per-policy affordability check
 
-\- Cascading failure propagation
+Final plan validation
 
-\- Fault-tree analysis (analytic + Monte Carlo)
+Budget Controller Output (Authoritative)
+{
+  "ok": true,
+  "ceiling": 120.0,
+  "spent": 105.2,
+  "remaining": 14.888,
+  "units": "isc_events"
+}
 
-\- Sensitivity analysis
 
-\- Adversarial Twin comparison (non-authoritative)
+If a policy exceeds remaining budget, it is unselectable.
 
+7. Policy Model
 
+Policies are explicit, atomic, and budget-filterable objects.
 
-All computation occurs \*\*offline\*\*.  
+Canonical Policy Fields
+Field	Purpose
+name	Stable policy identifier
+action_type	Semantic category (patch, scan, recalibration)
+target	System component
+expected_delta_p_top	Risk reduction
+expected_isc_cost	Budget cost
+r_eff	Efficiency metric
+expected_new_p_top	Post-policy projected state
+goal_compliant_after	Goal satisfaction flag
 
-No APIs. No cloud services. No hidden state.
+Policies are never inferred or synthesized at runtime.
 
+8. Active Policy Catalog (v3.6)
 
+POLICY_B_FAST_PATCH
 
----
+Low cost
 
+Small risk reduction
 
+Not goal-compliant alone
 
-\## 3. System Guarantees
+POLICY_A_DEEP_SCAN
 
+Moderate cost
 
+High validation value
 
-| Property | Status |
+Often goal-compliant
 
-|--------|--------|
+POLICY_C_PARTIAL_RECAL
 
-| Deterministic execution | ✅ |
+Critical fallback policy
 
-| Monte Carlo cross-validation | ✅ |
+Affordable under constrained budgets
 
-| Immutable output artifacts | ✅ |
+Enables progress when full recalibration is blocked
 
-| Audit-ready outputs | ✅ |
+FULL_RECAL is intentionally excluded when unaffordable.
 
-| Autonomous execution | ❌ |
+9. Planning Logic (High-Level)
+Load baseline
+↓
+Extract p_top and goal
+↓
+Query budget controller
+↓
+Filter policies by affordability
+↓
+Rank by mode-specific heuristic
+↓
+Select best viable policy (or sequence)
+↓
+Write plan to disk
+↓
+(Optional) Chronos commit
 
-| Cloud dependency | ❌ |
 
+At no point is system state mutated.
 
+10. Explainability Layer (v3.6+)
 
----
+MANTIS produces explainable rankings without altering budget authority.
 
+Each candidate policy includes:
 
+Affordability status
 
-\## 4. Governance Model (P6.3)
+Mode-specific score
 
+Tie-breaker rationale
 
+Human-readable explanation bullets
 
-PRAXIS TITAN enforces strict governance rules:
+Blocked policies may be included for audit transparency.
 
+Explainability is descriptive, not justificatory.
 
+11. Bounded Multi-Step Planning
 
-\- No hidden state mutation
+MANTIS can emit a bounded mitigation sequence under strict rules:
 
-\- No self-executing actions
+Fixed maximum steps (K)
 
-\- All outputs written as immutable artifacts
+Simulated budget ledger
 
-\- All costs tracked via an ISC ledger
+No refunds
 
-\- Explicit refusal paths when constraints are violated
+No repeats
 
+Fail-closed termination
 
+Multi-step plans are recommendations, not commitments.
 
-The engine \*\*can and will halt\*\* when safety, budget, or validation rules are broken.
+12. Failure Modes (Intentional)
+Condition	Result
+No affordable policy	REFUSAL
+Budget exhausted	HALT
+Missing baseline	ABORT
+Engine failure	Graceful fail-closed
 
+No silent success is permitted.
 
+13. Engineering Blueprint
+Core Modules
+praxis_core/
+└── mantis/
+    ├── runtime.py            # Orchestrator / CLI
+    ├── policy_engine.py      # Policy catalog + ranking
+    ├── budget_controller.py  # ISC accounting
+    ├── schemas.py            # Optional validation
 
-This behavior is intentional.
+Data Flow
+TITAN → baseline_summary.json
+      → MANTIS runtime
+      → policy_engine
+      → budget_controller
+      → mantis_plan.json
 
+14. Code DNA (Design Philosophy)
+Architectural Traits
 
+Deterministic
 
----
+File-driven
 
+Explicit over implicit
 
+Budget-first, goal-second
 
-\## 5. MANTIS Policy Layer
+Fail-closed
 
+Human-auditable
 
+This System Is Not
 
-The MANTIS module provides:
+An LLM agent
 
+A reinforcement learner
 
+An autonomous optimizer
 
-\- Budget-governed mitigation planning
+A self-executing controller
 
-\- Hard cost ceilings enforced via ISC
+15. Security & Governance Posture
 
-\- Policy sequencing without execution
+Human-in-the-loop by design
 
-\- Multiple urgency modes (ASAP / EFF / HYBRID)
+Immutable outputs
 
+Explicit cost visibility
 
+No self-authorization
 
-MANTIS \*\*does not execute actions\*\* and \*\*cannot override TITAN outputs\*\*.
+No recursive execution
 
+MANTIS meets safety-grade analytic system standards.
 
+16. Current Status (v3.6)
 
----
+✅ Runtime stable
 
+✅ Budget enforcement verified
 
+✅ Policy fallback functioning
 
-\## 6. Oracle Interface (Read-Only)
+✅ Multi-mode support verified
 
+⚠ Schema warnings acknowledged (non-fatal)
 
+❌ Chronos disabled by default (intentional)
 
-The Oracle interface is a \*\*non-authoritative inspection layer\*\* that:
+17. Approved Non-Breaking Extensions
 
+Explainable policy ranking enhancements
 
+Multi-step mitigation sequencing
 
-\- Reads validated artifacts only
+Formal schema enforcement
 
-\- Cannot hallucinate system state
+Chronos audit re-enablement
 
-\- Cannot mutate data
-
-\- Can refuse unsafe or unverifiable queries
-
-
-
-The Oracle exists to \*\*explain\*\*, not decide.
-
-
-
----
-
-
-
-\## 7. What PRAXIS TITAN Is Not
-
-
-
-PRAXIS TITAN is not:
-
-
-
-\- A conversational LLM
-
-\- An autonomous agent
-
-\- A black-box predictor
-
-\- A real-time control system
-
-
-
-It is an \*\*analytic instrument\*\*, not an actor.
-
-
-
----
-
-
-
-\## 8. Intended Use Cases
-
-
-
-\- Infrastructure risk analysis
-
-\- Financial stress testing
-
-\- System reliability modeling
-
-\- Policy trade-off evaluation
-
-\- Safety-critical scenario planning (analysis only)
-
-
-
----
-
-
-
-\## 9. Execution Model
-
-
-
-Typical workflow:
-
-
-
-1\. Define scenario configuration (JSON)
-
-2\. Execute TITAN analysis
-
-3\. Validate deterministic vs stochastic agreement
-
-4\. Invoke MANTIS planning (optional)
-
-5\. Inspect results via Oracle (read-only)
-
-
-
-No network access required at any stage.
-
-
-
----
-
-
-
-\## 10. Research Status
-
-
-
-This release is published for:
-
-
-
-\- Transparency
-
-\- Peer review
-
-\- Portfolio demonstration
-
-
-
-Commercial or operational deployment requires additional validation and licensing.
-
-
-
----
-
-
-
-\## 11. Attribution
-
-
-
-If referenced, adapted, or cited, attribution to:
-
-
-
-\*\*Samuel Lawson — Dark Science Division\*\*
-
-
-
-is required per the license.
-
-
-
----
-
-
-
-\*\*PRAXIS TITAN does not optimize for speed.  
-
-It optimizes for correctness, auditability, and restraint.\*\*
-
-
+PRAXIS MANTIS is a planner, not an actor.
+Cost authority is absolute.
+Failure is explicit.
+Silence is forbidden.
 
